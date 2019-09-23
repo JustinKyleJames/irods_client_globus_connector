@@ -41,7 +41,7 @@ if (DEFINED ENV{IRODS_PATH})
         set(irods_include_path_list "$ENV{IRODS_PATH}/include/irods")
         if (DEFINED ENV{IRODS_42_COMPAT})
 
-            find_package(IRODS 4.2.0 EXACT REQUIRED CONFIG)
+            find_package(IRODS 4.2.6 EXACT REQUIRED CONFIG)
 
             set(CMAKE_INSTALL_RPATH $ENV{IRODS_EXTERNALS_PATH}/clang-runtime3.8-0/lib)
             set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++")
