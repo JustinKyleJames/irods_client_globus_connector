@@ -250,9 +250,7 @@ target_link_libraries(${testpidmanager_exe} ${irods_link_obj_path} "-lm -lglobus
 set(CMAKE_C_FLAGS "-g -O2 -Wall -lstdc++ -lcurl -O3 -DNDEBUG")
 
 include_directories(${irods_include_path_list})
-include_directories($ENV{GLOBUS_LOCATION}/include/globus
-        $ENV{GLOBUS_LOCATION}/lib/globus/include
-        $ENV{GLOBUS_LOCATION}/lib64/globus/include
+include_directories($ENV{GLOBUS_LOCATION}/include
         DSI
         external)
 if (DEFINED ENV{FLAVOR})
