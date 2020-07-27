@@ -34,17 +34,17 @@ int manage_pid(char *pid_handle_URL, char *PID,  char **URL) {
     CURL *curl;
     CURLcode res;
     struct string s;
- 
+
     curl = curl_easy_init();
 
 
     if(curl) {
         init_string(&s);
         char* completeURL;
-        
+
         unsigned int len = strlen(pid_handle_URL);
         // Remove last "/" from handle URL
-        if (pid_handle_URL && pid_handle_URL[len - 1] == '/') 
+        if (pid_handle_URL && pid_handle_URL[len - 1] == '/')
         {
             pid_handle_URL[len - 1] = 0;
         }
@@ -58,7 +58,7 @@ int manage_pid(char *pid_handle_URL, char *PID,  char **URL) {
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writefunc);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &s);
         curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
- 
+
         // Perform the request, res will get the return code
         res = curl_easy_perform(curl);
 
@@ -76,7 +76,7 @@ int manage_pid(char *pid_handle_URL, char *PID,  char **URL) {
         globus_gfs_log_message(GLOBUS_GFS_LOG_INFO, "iRODS DSI: JSON output from the Handle Server: %s\n", s.ptr);
 
         cJSON *root = cJSON_Parse(s.ptr);
-        printf("JSON output: %s..\n", s.ptr);        
+        printf("JSON output: %s..\n", s.ptr);
         int responseCode  = cJSON_GetObjectItem(root,"responseCode")->valueint;
         if (responseCode != 1)
         {
