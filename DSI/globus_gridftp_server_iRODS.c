@@ -263,7 +263,7 @@ iRODS_getResource(
 
             if (strncmp(path_Read, destinationPath, strlen(path_Read)) == 0)
             {
-	            //found the resource
+                    //found the resource
                 iRODS_res = strtok(NULL, search);
                 unsigned int len = strlen(iRODS_res);
                 if (iRODS_res[len - 1] == '\n')
@@ -394,38 +394,70 @@ iRODS_l_stat_dir(
         return status;
     }
 
+
+    // jjames - get the update interval hint
+    int update_interval;
+    globus_gridftp_server_get_update_interval(op, &update_interval);
+    globus_gfs_log_message(GLOBUS_GFS_LOG_INFO,"iRODS DSI: update_interval = %d", update_interval);
+
+    time_t last_update_time = time(0);
+
+
     //We should always be including "." and ".."
     //Run this block twice, add "." on iteration 0, ".." on iteration 1
     //We skip this for the root directory, as it already provides "."
     //internally - and we do not need .. there.
-    if (strcmp("/", start_dir) !=0 )
-      for (internal_idx = 0; internal_idx<=1; internal_idx++) {
-        stat_count++;
-        stat_array = (globus_gfs_stat_t *) globus_realloc(stat_array, stat_count * sizeof(globus_gfs_stat_t));
-        memset(&stat_array[stat_ndx], '\0', sizeof(globus_gfs_stat_t));
-        if ( internal_idx == 0 ) {
-            stat_array[stat_ndx].ino = iRODS_l_filename_hash(start_dir);
-            stat_array[stat_ndx].name = globus_libc_strdup(".");
-        } else {
-            char * parent_dir = strdup(start_dir);
-            char * last_slash = strrchr(parent_dir,'/');
-            if (last_slash != NULL) *last_slash='\0';
-            stat_array[stat_ndx].ino = iRODS_l_filename_hash(parent_dir);
-            stat_array[stat_ndx].name = globus_libc_strdup("..");
-            free(parent_dir);
-        };
-        stat_array[stat_ndx].nlink = 0;
-        stat_array[stat_ndx].uid = getuid();
-        stat_array[stat_ndx].gid = getgid();
-        stat_array[stat_ndx].size = 0;
-        stat_array[stat_ndx].dev = iRODS_l_dev_wrapper++;
-        stat_array[stat_ndx].mode = S_IFDIR | S_IRUSR | S_IWUSR |
-            S_IXUSR | S_IROTH | S_IXOTH | S_IRGRP | S_IXGRP;
-        stat_ndx++;
-      }
+    if (strcmp("/", start_dir) !=0 ) {
+        for (internal_idx = 0; internal_idx<=1; internal_idx++) {
+            stat_count++;
+            stat_array = (globus_gfs_stat_t *) globus_realloc(stat_array, stat_count * sizeof(globus_gfs_stat_t));
+            memset(&stat_array[stat_ndx], '\0', sizeof(globus_gfs_stat_t));
+            if ( internal_idx == 0 ) {
+                stat_array[stat_ndx].ino = iRODS_l_filename_hash(start_dir);
+                stat_array[stat_ndx].name = globus_libc_strdup(".");
+            } else {
+                char * parent_dir = strdup(start_dir);
+                char * last_slash = strrchr(parent_dir,'/');
+                if (last_slash != NULL) *last_slash='\0';
+                stat_array[stat_ndx].ino = iRODS_l_filename_hash(parent_dir);
+                stat_array[stat_ndx].name = globus_libc_strdup("..");
+                free(parent_dir);
+            };
+            stat_array[stat_ndx].nlink = 0;
+            stat_array[stat_ndx].uid = getuid();
+            stat_array[stat_ndx].gid = getgid();
+            stat_array[stat_ndx].size = 0;
+            stat_array[stat_ndx].dev = iRODS_l_dev_wrapper++;
+            stat_array[stat_ndx].mode = S_IFDIR | S_IRUSR | S_IWUSR |
+                S_IXUSR | S_IROTH | S_IXOTH | S_IRGRP | S_IXGRP;
+            stat_ndx++;
+
+        }
+    }
 
     while ((status = rclReadCollection (conn, &collHandle, &collEnt)) >= 0)
     {
+        time_t now = time(0);
+        time_t diff = now - last_update_time;
+
+        // go ahead and send a partial listing every 500 entries
+        if (diff > update_interval || stat_count >= 500) {
+
+            // send partial stat
+            globus_gridftp_server_finished_stat_partial(op, GLOBUS_SUCCESS, stat_array, stat_count);
+
+            /* free the names and array */
+            for(i = 0; i < stat_count; i++)
+            {
+                globus_free(stat_array[i].name);
+            }
+            globus_free(stat_array);
+            stat_array = NULL;
+            stat_count = 0;
+
+            last_update_time = now;
+        }
+
         // skip duplicate listings of data objects (additional replicas)
         if ( (collEnt.objType == DATA_OBJ_T) &&
              (stat_last_data_obj_name != NULL) &&
@@ -436,24 +468,24 @@ iRODS_l_stat_dir(
 
         if (collEnt.objType == DATA_OBJ_T)
         {
-		    memset(&stat_array[stat_ndx], '\0', sizeof(globus_gfs_stat_t));
-		    stat_array[stat_ndx].symlink_target = NULL;
-		    stat_array[stat_ndx].name = globus_libc_strdup(collEnt.dataName);
-                    stat_last_data_obj_name = stat_array[stat_ndx].name;
-    	    stat_array[stat_ndx].nlink = 0;
-	        stat_array[stat_ndx].uid = getuid();
+            memset(&stat_array[stat_ndx], '\0', sizeof(globus_gfs_stat_t));
+            stat_array[stat_ndx].symlink_target = NULL;
+            stat_array[stat_ndx].name = globus_libc_strdup(collEnt.dataName);
+            stat_last_data_obj_name = stat_array[stat_ndx].name;
+            stat_array[stat_ndx].nlink = 0;
+            stat_array[stat_ndx].uid = getuid();
 
-	        //I could get unix uid from iRODS owner, but iRODS owner can not exist as unix user
-	       	//so now the file owner is always the user who started the gridftp process
-	       	//stat_array[stat_ndx].uid = getpwnam(ownerName)->pw_uid;
-		
+            //I could get unix uid from iRODS owner, but iRODS owner can not exist as unix user
+            //so now the file owner is always the user who started the gridftp process
+            //stat_array[stat_ndx].uid = getpwnam(ownerName)->pw_uid;
+
             stat_array[stat_ndx].gid = getgid();
             stat_array[stat_ndx].size = collEnt.dataSize;
 
-		    time_t realTime = atol(collEnt.modifyTime);
-	    	stat_array[stat_ndx].ctime = realTime;
-    	  	stat_array[stat_ndx].mtime = realTime;
-        	stat_array[stat_ndx].atime = realTime;
+            time_t realTime = atol(collEnt.modifyTime);
+            stat_array[stat_ndx].ctime = realTime;
+            stat_array[stat_ndx].mtime = realTime;
+            stat_array[stat_ndx].atime = realTime;
             stat_array[stat_ndx].dev = iRODS_l_dev_wrapper++;
             stat_array[stat_ndx].ino = iRODS_l_filename_hash(collEnt.dataName);
             stat_array[stat_ndx].mode = S_IFREG | S_IRUSR | S_IWUSR |
@@ -744,12 +776,12 @@ globus_l_gfs_iRODS_destroy(
 
     if (user_arg != NULL) {
 
-		iRODS_handle = (globus_l_gfs_iRODS_handle_t *) user_arg;
-		globus_mutex_destroy(&iRODS_handle->mutex);
-		globus_fifo_destroy(&iRODS_handle->rh_q);
-		iRODS_disconnect(iRODS_handle->conn);
+                iRODS_handle = (globus_l_gfs_iRODS_handle_t *) user_arg;
+                globus_mutex_destroy(&iRODS_handle->mutex);
+                globus_fifo_destroy(&iRODS_handle->rh_q);
+                iRODS_disconnect(iRODS_handle->conn);
 
-		globus_free(iRODS_handle);
+                globus_free(iRODS_handle);
     };
 }
 
@@ -867,9 +899,9 @@ globus_l_gfs_iRODS_stat(
             }
         }
 
-	globus_gfs_log_message(GLOBUS_GFS_LOG_INFO,"iRODS DSI: stat_info->pathname=%s\n", stat_info->pathname);
-	if (iRODS_handle->resolved_stat_path)
-	{
+        globus_gfs_log_message(GLOBUS_GFS_LOG_INFO,"iRODS DSI: stat_info->pathname=%s\n", stat_info->pathname);
+        if (iRODS_handle->resolved_stat_path)
+        {
             globus_gfs_log_message(GLOBUS_GFS_LOG_INFO,"iRODS DSI: iRODS_handle->resolved_stat_path=%s\n", iRODS_handle->resolved_stat_path);
         }
     }
@@ -889,21 +921,25 @@ globus_l_gfs_iRODS_stat(
     if(!S_ISDIR(stat_buf.mode) || stat_info->file_only)
     {
         //globus_gfs_log_message(GLOBUS_GFS_LOG_INFO, "iRODS: globus_l_gfs_iRODS_stat(): single file\n");
-	stat_array = (globus_gfs_stat_t *) globus_calloc(
-	     1, sizeof(globus_gfs_stat_t));
-	 memcpy(stat_array, &stat_buf, sizeof(globus_gfs_stat_t));
+        stat_array = (globus_gfs_stat_t *) globus_calloc(
+             1, sizeof(globus_gfs_stat_t));
+         memcpy(stat_array, &stat_buf, sizeof(globus_gfs_stat_t));
     }
     else
     {
         //globus_gfs_log_message(GLOBUS_GFS_LOG_INFO, "iRODS: globus_l_gfs_iRODS_stat(): collection\n");
-	int rc;
-	free(stat_buf.name);
-	rc = iRODS_l_stat_dir(iRODS_handle->conn, &stat_array, &stat_count, stat_info->pathname, iRODS_handle->user);
+        int rc;
+        free(stat_buf.name);
+
+        // jjames - iRODS_l_stat_dir sends partial listings via globus_gridftp_server_finished_stat_partial,
+        // any left over the rest will be handled below as normal
+        rc = iRODS_l_stat_dir(iRODS_handle->conn, &stat_array, &stat_count, stat_info->pathname, iRODS_handle->user);
         if(rc != 0)
         {
             result = globus_l_gfs_iRODS_make_error("iRODS_l_stat_dir failed.", rc);
             goto error;
         }
+
     }
 
     globus_gridftp_server_finished_stat(
@@ -1018,8 +1054,8 @@ globus_l_gfs_iRODS_command(
                dataObjInp_t dataObjInp;
                bzero (&dataObjInp, sizeof (dataObjInp));
                rstrcpy (dataObjInp.objPath, collection, MAX_NAME_LEN);
-	       //The VERIFY_CHKSUM_KW flag seems useless: checksum is retrieved if exists or calculated
-	       //if it doesn't exist
+               //The VERIFY_CHKSUM_KW flag seems useless: checksum is retrieved if exists or calculated
+               //if it doesn't exist
                //addKeyVal (&dataObjInp.condInput, VERIFY_CHKSUM_KW, "");
                globus_gfs_log_message(GLOBUS_GFS_LOG_INFO,"iRODS DSI: rcDataObjChksum of collection=%s\n", collection);
                status = rcDataObjChksum (iRODS_handle->conn, &dataObjInp, &outChksum);
@@ -1363,7 +1399,7 @@ globus_l_gfs_iRODS_send(
             }
             else
             {
-		error_str = globus_common_create_string("rcDataObjOpen failed opening '%s' (the DSI has also tryed to manage the path as a PID but the resolution through the Handle Server '%s' failed)", collection, handle_server);
+                error_str = globus_common_create_string("rcDataObjOpen failed opening '%s' (the DSI has also tryed to manage the path as a PID but the resolution through the Handle Server '%s' failed)", collection, handle_server);
             }
         else
         {
@@ -1468,7 +1504,7 @@ globus_l_gfs_iRODS_net_read_cb(
             dataObjLseekInp.whence = SEEK_SET;
 
             int status = rcDataObjLseek(iRODS_handle->conn, &dataObjLseekInp, &dataObjLseekOut);
-	    // verify that it worked
+            // verify that it worked
             if(status < 0)
             {
                 iRODS_handle->cached_res = globus_l_gfs_iRODS_make_error("rcDataObjLseek failed", status);
