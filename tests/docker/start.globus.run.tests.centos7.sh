@@ -9,7 +9,7 @@ tempZone
 rods' | iinit
 
 #### Add user1 as a local user for testing ####
-useradd user1 -m -s /bin/bash
+useradd user1 -m -s /usr/bin/bash
 
 #### Give user1 an environment to connect to iRODS ####
 sudo -H -u user1 bash -c "
@@ -70,7 +70,7 @@ mkdir /bld_irods_client_globus_connector
 cd /bld_irods_client_globus_connector
 /opt/irods-externals/cmake3.21.4-0/bin/cmake /irods_client_globus_connector
 make -j package
-dpkg -i *.deb
+rpm --force -i *.rpm
 
 #### Start gridftp server ####
 /usr/sbin/globus-gridftp-server -allow-root -log-module stdio:buffer=0 -threads 1 -aa -c /etc/gridftp.conf -pidfile /var/run/globus-gridftp-server.pid -log-level trace,info,warn,error -logfile /var/log/gridftp.log -no-detach -config-base-path / &

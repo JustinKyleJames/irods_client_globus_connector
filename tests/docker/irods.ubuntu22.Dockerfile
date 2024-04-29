@@ -5,6 +5,7 @@ RUN chmod u+x /start.irods.ubuntu22.sh
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=true
+ARG irods_version
 
 #### install basic packages ####
 RUN apt-get update && \
@@ -32,9 +33,13 @@ RUN apt-get update
 #### Install iRODS ####
 #ARG irods_version
 #ENV IRODS_VERSION ${irods_version}
-ENV irods_version 4.3.1-0~jammy
-
-RUN apt-get install -y irods-server=${irods_version} irods-dev=${irods_version} irods-database-plugin-postgres=${irods_version} irods-runtime=${irods_version} irods-icommands=${irods_version}
+#ENV irods_version 4.3.1-0~jammy
+# If irods_package_directory is defined, use the packages located in that directory.
+# Otherwise, if irods_version is defined, install that version from the iRODS repository.
+# Otherwise, install the default verion.
+RUN apt-get install -y irods-externals-avro-libcxx1.11.0-3 irods-externals-boost-libcxx1.81.0-1 irods-externals-fmt-libcxx8.1.1-1 irods-externals-nanodbc-libcxx2.13.0-2 irods-externals-zeromq4-1-libcxx4.1.8-1 irods-externals-spdlog-libcxx1.9.2-2 irods-externals-clang-runtime13.0.1-0
+RUN echo ================== irods_package_directory = $irods_package_directory ==========================
+RUN if [[ -d "/irods_pakcage_directory" ]]; then dpkg -i /irods_package_directory/irods-server* /irods_package_directory/irods-dev* /irods_package_directory/irods-database-plugin-postgres* /irods_package_directory/irods-runtime* /irods_package_directory/irods-icommands*; elif [[ "$irods_version" != "" ]]; then apt-get install -y irods-server=${irods_version} irods-dev=${irods_version} irods-database-plugin-postgres=${irods_version} irods-runtime=${irods_version} irods-icommands=${irods_version}; else apt-get install -y irods-server irods-database-plugin-postgres; fi
 
 #### Set up ICAT database. ####
 ADD db_commands.txt /

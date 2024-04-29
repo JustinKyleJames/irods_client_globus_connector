@@ -5,6 +5,8 @@ services:
         build:
             context: . 
             dockerfile: irods.ubuntu22.Dockerfile
+            args:
+                - irods_package_directory=/home/jjames/irods_development_environment_output/packages/ub22
         healthcheck:
             test: ils || exit 1
             start_period: 20s
@@ -16,6 +18,8 @@ services:
                 limits:
                     cpus: 1
                     memory: 8G 
+        volumes:
+            - /home/jjames/irods_development_environment_output/packages/ub22:/irods_package_directory
     globus-ubuntu22:
         build:
             context: .
@@ -29,6 +33,51 @@ services:
         build:
             context: .
             dockerfile: globus.ubuntu20.Dockerfile
+        depends_on:
+            irods:
+                condition: service_healthy
+        volumes:
+            - ../../:/irods_client_globus_connector 
+    globus-centos7:
+        build:
+            context: .
+            dockerfile: globus.centos7.Dockerfile
+        depends_on:
+            irods:
+                condition: service_healthy
+        volumes:
+            - ../../:/irods_client_globus_connector 
+    globus-debian11:
+        build:
+            context: .
+            dockerfile: globus.debian11.Dockerfile
+        depends_on:
+            irods:
+                condition: service_healthy
+        volumes:
+            - ../../:/irods_client_globus_connector 
+    globus-debian12:
+        build:
+            context: .
+            dockerfile: globus.debian12.Dockerfile
+        depends_on:
+            irods:
+                condition: service_healthy
+        volumes:
+            - ../../:/irods_client_globus_connector 
+    globus-almalinux8:
+        build:
+            context: .
+            dockerfile: globus.almalinux8.Dockerfile
+        depends_on:
+            irods:
+                condition: service_healthy
+        volumes:
+            - ../../:/irods_client_globus_connector 
+    globus-rockylinux9:
+        build:
+            context: .
+            dockerfile: globus.rockylinux9.Dockerfile
         depends_on:
             irods:
                 condition: service_healthy
