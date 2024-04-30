@@ -19,6 +19,8 @@ RUN \
     procps \
     rpm-build \
     pam-devel \
+    ftp \
+    telnet \
   && \
   yum clean all && \
   rm -rf /var/cache/yum /tmp/*
