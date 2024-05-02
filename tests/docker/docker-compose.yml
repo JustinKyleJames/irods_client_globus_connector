@@ -6,7 +6,7 @@ services:
             context: . 
             dockerfile: irods.ubuntu22.Dockerfile
             args:
-                - irods_package_directory=/home/jjames/irods_development_environment_output/packages/ub22
+                - irods_package_directory=/irods_package_directory
         healthcheck:
             test: ils || exit 1
             start_period: 20s
@@ -19,7 +19,7 @@ services:
                     cpus: 1
                     memory: 8G 
         volumes:
-            - /home/jjames/irods_development_environment_output/packages/ub22:/irods_package_directory
+            - /home/jjames/irods_development_environment_output/packages/ub22_433:/irods_package_directory
     globus-ubuntu22:
         build:
             context: .
