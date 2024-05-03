@@ -54,13 +54,12 @@ RUN dnf install -y \
     rm -rf /tmp/*
 
 #### Install icommands - used to set up, validate and tear down tests. ####
-RUN dnf install -y irods-icommands
+#RUN dnf install -y irods-icommands
 
-#### Install irods-dev, cmake, clang  - used to build the connector ####
+#### Install cmake, clang  - used to build the connector ####
 #RUN dnf install -y devtoolset-10
 RUN dnf install -y irods-externals-cmake3.21.4-0
 RUN dnf install -y irods-externals-clang-runtime13.0.0-0 irods-externals-clang13.0.0-0
-RUN dnf install -y irods-devel
 
 COPY rsyslog.conf /etc/rsyslog.conf
 
@@ -109,8 +108,8 @@ RUN dnf install -y postgresql-server postgresql-contrib
 RUN su - postgres -c "pg_ctl initdb"
 RUN su - postgres -c "/usr/bin/pg_ctl -D /var/lib/pgsql/data -l logfile start && sleep 1 && psql -f /db_commands.txt"
 
-ADD start.globus.run.tests.centos7.sh /
-RUN chmod u+x /start.globus.run.tests.centos7.sh
+ADD start.globus.run.tests.rhel.sh /
+RUN chmod u+x /start.globus.run.tests.rhel.sh
 
-ENTRYPOINT "/start.globus.run.tests.centos7.sh"
+ENTRYPOINT "/start.globus.run.tests.rhel.sh"
 

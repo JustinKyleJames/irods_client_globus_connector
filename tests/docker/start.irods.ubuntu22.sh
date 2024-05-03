@@ -1,5 +1,12 @@
 #! /bin/bash
 
+# Install iRODS
+if [[ -d "/irods_package_directory" ]]; then
+    dpkg -i /irods_package_directory/irods-server* /irods_package_directory/irods-dev* /irods_package_directory/irods-database-plugin-postgres* /irods_package_directory/irods-runtime* /irods_package_directory/irods-icommands*
+else 
+    apt-get install -y irods-server irods-database-plugin-postgres
+fi
+
 # Start the Postgres database.
 service postgresql start
 counter=0

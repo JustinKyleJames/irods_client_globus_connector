@@ -1,5 +1,12 @@
 #! /bin/bash
 
+# Install iRODS icommands
+if [[ -d "/irods_package_directory" ]]; then
+    rpm --force -i /irods_package_directory/irods-icommands* /irods_package_directory/irods-devel*
+else 
+    yum install -y irods-icommands irods-devel
+fi
+
 #### Give root an environment to connect to iRODS as irods ####
 #### Needed to set up testing.                             ####
 echo 'irods

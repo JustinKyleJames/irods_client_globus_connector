@@ -1,11 +1,11 @@
 #! /bin/bash
 
 # Install iRODS icommands
-#if [[ -d "/irods_package_directory" ]]; then
-#    dpkg -i /irods_package_directory/irods-client-icommands* /irods_package_directory/irods-dev*
-#else 
-    sudo apt-get install -y irods-icommands irods-dev
-#fi
+if [[ -d "/irods_package_directory" ]]; then
+    dpkg -i /irods_package_directory/irods-icommands* /irods_package_directory/irods-dev*
+else 
+    dnf install -y irods-icommands irods-dev
+fi
 
 #### Give root an environment to connect to iRODS as irods ####
 #### Needed to set up testing.                             ####

@@ -43,14 +43,9 @@ RUN rpm --import https://packages.irods.org/irods-signing-key.asc && \
 RUN rpm --import https://core-dev.irods.org/irods-core-dev-signing-key.asc && \
     wget -qO - https://core-dev.irods.org/renci-irods-core-dev.yum.repo | tee /etc/yum.repos.d/renci-irods-core-dev.yum.repo
 
-#### Install icommands - used to set up, validate and tear down tests. ####
-RUN yum install -y irods-icommands
-
-#### Install irods-dev, cmake, clang  - used to build the connector ####
-#RUN yum install -y devtoolset-10
+#### Install cmake, clang  - used to build the connector ####
 RUN yum install -y irods-externals-cmake3.21.4-0
 RUN yum install -y irods-externals-clang-runtime13.0.0-0 irods-externals-clang13.0.0-0
-RUN yum install -y irods-devel
 
 COPY rsyslog.conf /etc/rsyslog.conf
 
@@ -89,8 +84,8 @@ RUN yum install -y postgresql-server postgresql-contrib
 RUN su - postgres -c "pg_ctl initdb"
 RUN su - postgres -c "/usr/bin/pg_ctl -D /var/lib/pgsql/data -l logfile start && sleep 1 && psql -f /db_commands.txt"
 
-ADD start.globus.run.tests.centos7.sh /
-RUN chmod u+x /start.globus.run.tests.centos7.sh
+ADD start.globus.run.tests.rhel.sh /
+RUN chmod u+x /start.globus.run.tests.rhel.sh
 
-ENTRYPOINT "/start.globus.run.tests.centos7.sh"
+ENTRYPOINT "/start.globus.run.tests.rhel.sh"
 

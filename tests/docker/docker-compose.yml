@@ -5,8 +5,6 @@ services:
         build:
             context: . 
             dockerfile: irods.ubuntu22.Dockerfile
-            args:
-                - irods_package_directory=/irods_package_directory
         healthcheck:
             test: ils || exit 1
             start_period: 20s
@@ -20,6 +18,8 @@ services:
                     memory: 8G 
         volumes:
             - /home/jjames/irods_development_environment_output/packages/ub22_433:/irods_package_directory
+        environment: 
+            - irods_packages_directory=${irods_packages_directory}
     globus-ubuntu22:
         build:
             context: .
@@ -29,6 +29,7 @@ services:
                 condition: service_healthy
         volumes:
             - ../../:/irods_client_globus_connector 
+            - /home/jjames/irods_development_environment_output/packages/ub22_433:/irods_package_directory
     globus-ubuntu20:
         build:
             context: .
@@ -38,6 +39,7 @@ services:
                 condition: service_healthy
         volumes:
             - ../../:/irods_client_globus_connector 
+            - /home/jjames/irods_development_environment_output/packages/ub22_433:/irods_package_directory
     globus-centos7:
         build:
             context: .
@@ -47,6 +49,7 @@ services:
                 condition: service_healthy
         volumes:
             - ../../:/irods_client_globus_connector 
+            - /home/jjames/irods_development_environment_output/packages/ub22_433:/irods_package_directory
     globus-debian11:
         build:
             context: .
@@ -56,6 +59,7 @@ services:
                 condition: service_healthy
         volumes:
             - ../../:/irods_client_globus_connector 
+            - /home/jjames/irods_development_environment_output/packages/ub22_433:/irods_package_directory
     globus-debian12:
         build:
             context: .
@@ -65,6 +69,7 @@ services:
                 condition: service_healthy
         volumes:
             - ../../:/irods_client_globus_connector 
+            - /home/jjames/irods_development_environment_output/packages/ub22_433:/irods_package_directory
     globus-almalinux8:
         build:
             context: .
@@ -74,6 +79,7 @@ services:
                 condition: service_healthy
         volumes:
             - ../../:/irods_client_globus_connector 
+            - /home/jjames/irods_development_environment_output/packages/ub22_433:/irods_package_directory
     globus-rockylinux9:
         build:
             context: .
@@ -83,3 +89,4 @@ services:
                 condition: service_healthy
         volumes:
             - ../../:/irods_client_globus_connector 
+            - /home/jjames/irods_development_environment_output/packages/ub22_433:/irods_package_directory

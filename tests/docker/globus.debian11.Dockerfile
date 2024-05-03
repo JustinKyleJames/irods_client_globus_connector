@@ -9,13 +9,9 @@ RUN wget -qO - https://packages.irods.org/irods-signing-key.asc | apt-key add -
 RUN echo "deb [arch=amd64] https://packages.irods.org/apt/ $(lsb_release -sc) main" | tee /etc/apt/sources.list.d/renci-irods.list
 RUN apt-get update
 
-#### Install icommands - used to set up, validate and tear down tests. ####
-RUN apt-get install -y irods-icommands
-
-#### Install irods-dev, cmake, clang  - used to build the connector ####
+#### Install cmake, clang  - used to build the connector ####
 RUN apt-get install -y irods-externals-cmake3.21.4-0
 RUN apt-get install -y irods-externals-clang*
-RUN apt-get install -y irods-dev
 
 #### install basic packages ####
 RUN apt-get install -y curl \
@@ -30,7 +26,8 @@ RUN apt-get install -y curl \
     python3-jsonschema \
     python3-requests \
     python3-pip \
-    python3-pyodbc
+    python3-pyodbc \
+    sudo
 
 #### Get and install globus repo ####
 RUN wget -q https://downloads.globus.org/globus-connect-server/stable/installers/repo/deb/globus-repo_latest_all.deb
