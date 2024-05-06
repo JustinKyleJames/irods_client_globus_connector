@@ -2,7 +2,7 @@
 
 # Install iRODS icommands
 #if [[ -d "/irods_package_directory" ]]; then
-#    dpkg -i /irods_package_directory/irods-client-icommands* /irods_package_directory/irods-dev*
+#    dpkg -i /irods_package_directory/irods-icommands* /irods_package_directory/irods-dev*
 #else 
     sudo apt-get install -y irods-icommands irods-dev
 #fi
@@ -47,7 +47,7 @@ cp hostcert.pem /etc/grid-security/hostcert.pem
 cp hostcert.pem ~/.globus/usercert.pem
 
 #### Set up grid-mapfile ####
-subject=`openssl x509 -noout -in /etc/grid-security/hostcert.pem -subject | cut -d'=' -f2- | sed -e 's|,|/|g' | sed -e 's|/ |/|g' | sed -e 's/ = /=/g'`
+subject=`openssl x509 -noout -in /etc/grid-security/hostcert.pem -subject | cut -d'=' -f2- | sed -e 's|,|/|g' | sed -e 's|/ |/|g' | sed -e 's/ = /=/g' | sed -e 's/^[ ]\+//g'`
 echo "\"/$subject\" rods" | sudo tee -a /etc/grid-security/grid-mapfile
 
 #### Set up /etc/gridftp.conf also allowing user1 to user anonymous ftp ####

@@ -1,11 +1,11 @@
 #! /bin/bash
 
 # Install iRODS icommands
-if [[ -d "/irods_package_directory" ]]; then
-    rpm --force -i /irods_package_directory/irods-icommands* /irods_package_directory/irods-devel*
-else 
+#if [[ -d "/irods_package_directory" ]]; then
+#    rpm --force -i /irods_package_directory/irods-icommands* /irods_package_directory/irods-devel*
+#else 
     yum install -y irods-icommands irods-devel
-fi
+#fi
 
 #### Give root an environment to connect to iRODS as irods ####
 #### Needed to set up testing.                             ####
@@ -47,7 +47,7 @@ cp hostcert.pem /etc/grid-security/hostcert.pem
 cp hostcert.pem ~/.globus/usercert.pem
 
 #### Set up grid-mapfile ####
-subject=`openssl x509 -noout -in /etc/grid-security/hostcert.pem -subject | cut -d'=' -f2- | sed -e 's|,|/|g' | sed -e 's|/ |/|g' | sed -e 's/ = /=/g'`
+subject=`openssl x509 -noout -in /etc/grid-security/hostcert.pem -subject | cut -d'=' -f2- | sed -e 's|,|/|g' | sed -e 's|/ |/|g' | sed -e 's/ = /=/g' | sed -e 's/^[ ]\+//g' | sed -e 's/^\///g'`
 echo "\"/$subject\" rods" | sudo tee -a /etc/grid-security/grid-mapfile
 
 #### Set up /etc/gridftp.conf also allowing user1 to user anonymous ftp ####
@@ -86,5 +86,5 @@ cd /
 
 #### Run All Tests ####
 cd /irods_client_globus_connector/tests
-#python3 run_all_tests.py
+python3 run_all_tests.py
 tail -f /dev/null

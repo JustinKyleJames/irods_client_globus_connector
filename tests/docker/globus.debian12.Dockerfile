@@ -52,7 +52,7 @@ RUN wget -qO - https://packages.irods.org/irods-signing-key.asc | sudo apt-key a
 RUN echo "deb [arch=amd64] https://packages.irods.org/apt/ $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/renci-irods.list
 RUN apt-get update
 
-ADD start.globus.run.tests.deb12.sh /
-RUN chmod u+x /start.globus.run.tests.deb12.sh
+ADD start.globus.run.tests.ubuntu.sh /
+RUN chmod u+x /start.globus.run.tests.ubuntu.sh
 
-ENTRYPOINT "/start.globus.run.tests.deb12.sh"
+ENTRYPOINT "/start.globus.run.tests.ubuntu.sh"

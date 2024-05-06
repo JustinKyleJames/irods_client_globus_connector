@@ -59,7 +59,7 @@ RUN dnf install -y \
 #### Install cmake, clang  - used to build the connector ####
 #RUN dnf install -y devtoolset-10
 RUN dnf install -y irods-externals-cmake3.21.4-0
-RUN dnf install -y irods-externals-clang-runtime13.0.0-0 irods-externals-clang13.0.0-0
+RUN dnf install -y irods-externals-clang-runtime13.0.1-0 irods-externals-clang13.0.1-0
 
 COPY rsyslog.conf /etc/rsyslog.conf
 

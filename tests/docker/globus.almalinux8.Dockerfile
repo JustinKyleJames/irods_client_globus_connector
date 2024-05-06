@@ -48,7 +48,7 @@ RUN rpm --import https://core-dev.irods.org/irods-core-dev-signing-key.asc && \
 #### Install cmake, clang  - used to build the connector ####
 #RUN yum install -y devtoolset-10
 RUN yum install -y irods-externals-cmake3.21.4-0
-RUN yum install -y irods-externals-clang-runtime13.0.0-0 irods-externals-clang13.0.0-0
+RUN yum install -y irods-externals-clang-runtime13.0.1-0 irods-externals-clang13.0.1-0
 
 COPY rsyslog.conf /etc/rsyslog.conf
 
