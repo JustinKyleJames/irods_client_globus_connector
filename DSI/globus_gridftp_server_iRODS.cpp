@@ -2009,6 +2009,8 @@ globus_l_gfs_iRODS_recv(
     globus_gfs_transfer_info_t *        transfer_info,
     void *                              user_arg)
 {
+    namespace fs = irods::experimental::filesystem;
+
     GlobusGFSName(globus_l_gfs_iRODS_recv);
 
     globus_gfs_log_message(GLOBUS_GFS_LOG_INFO, "iRODS: %s called\n", __FUNCTION__);
