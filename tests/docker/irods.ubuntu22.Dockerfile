@@ -1,8 +1,5 @@
 FROM ubuntu:22.04
 
-ADD start.irods.ubuntu22.sh /
-RUN chmod u+x /start.irods.ubuntu22.sh
-
 ARG DEBIAN_FRONTEND=noninteractive
 ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=true
 
@@ -34,11 +31,15 @@ RUN apt-get update
 #ENV IRODS_VERSION ${irods_version}
 ENV irods_version 4.3.1-0~jammy
 
-RUN apt-get install -y irods-server=${irods_version} irods-dev=${irods_version} irods-database-plugin-postgres=${irods_version} irods-runtime=${irods_version} irods-icommands=${irods_version}
+#RUN apt-get install -y irods-server=${irods_version} irods-dev=${irods_version} irods-database-plugin-postgres=${irods_version} irods-runtime=${irods_version} irods-icommands=${irods_version}
+#RUN dpkg -i /irods_packages/irods-database-plugin-postgres_4.3.3-0~jammy_amd64.deb /irods_packages/irods-dev_4.3.3-0~jammy_amd64.deb /irods_packages/irods-icommands_4.3.3-0~jammy_amd64.deb /irods_packages/irods-runtime_4.3.3-0~jammy_amd64.deb /irods_packages/irods-server_4.3.3-0~jammy_amd64.deb
 
 #### Set up ICAT database. ####
 ADD db_commands.txt /
 RUN service postgresql start && su - postgres -c 'psql -f /db_commands.txt'
 
-ENTRYPOINT "/start.irods.ubuntu22.sh"
+#RUN apt-get install -y irods-externals-avro-libcxx1.11.0-3 irods-externals-boost-libcxx1.81.0-1 irods-externals-nanodbc-libcxx2.13.0-2 irods-externals-zeromq4-1-libcxx4.1.8-1 irods-externals-spdlog-libcxx1.9.2-2 irods-externals-libarchive3.5.2-0 irods-externals-clang-runtime13.0.1-0 
 
+ADD start.irods.ubuntu22.sh /
+RUN chmod u+x /start.irods.ubuntu22.sh
+ENTRYPOINT "/start.irods.ubuntu22.sh"

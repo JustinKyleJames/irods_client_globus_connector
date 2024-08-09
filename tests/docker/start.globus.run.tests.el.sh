@@ -1,9 +1,11 @@
 #! /bin/bash
-#cd /irods_packages
-#apt install -y ./irods-dev_4.3.3-0~jammy_amd64.deb ./irods-runtime_4.3.3-0~jammy_amd64.deb ./irods-icommands_4.3.3-0~jammy_amd64.deb
 
 # install iRODS client packages built by development environment 
 /install_local_irods_packages.sh
+
+##### Create user1 in iRODS ####
+sudo -H -u irods bash -c "iadmin mkuser user1 rodsuser"
+sudo -H -u irods bash -c "iadmin moduser user1 password user1"
 
 #### Give root an environment to connect to iRODS as rods  ####
 #### Needed to set up testing.                             ####
@@ -14,7 +16,7 @@ tempZone
 rods' | iinit
 
 #### Add user1 as a local user for testing ####
-useradd user1 -m -s /bin/bash
+useradd user1 -m -s /usr/bin/bash
 
 #### Give user1 an environment to connect to iRODS ####
 sudo -H -u user1 bash -c "
@@ -26,7 +28,7 @@ user1' | iinit"
 
 #### configure globus certs ####
 # the folowing seems to be automatic now
-#sudo grid-ca-create -noint  # puts files in /etc/grid-security/certificates
+# sudo grid-ca-create -noint  # puts files in /etc/grid-security/certificates
 
 # this seems required to run grid-cert-request
 mkdir /var/adm
@@ -75,11 +77,11 @@ mkdir /bld_irods_client_globus_connector
 cd /bld_irods_client_globus_connector
 /opt/irods-externals/cmake3.21.4-0/bin/cmake /irods_client_globus_connector
 make -j package
-dpkg -i *.deb
+rpm --force -i *.rpm
 
 #### Start gridftp server ####
 /usr/sbin/globus-gridftp-server -allow-root -log-module stdio:buffer=0 -threads 1 -aa -c /etc/gridftp.conf -pidfile /var/run/globus-gridftp-server.pid -log-level trace,info,warn,error -logfile /var/log/gridftp.log -no-detach -config-base-path / &
 
-#### Run All Tests ####
+#### Keep container running ####
 cd /irods_client_globus_connector/tests
 python3 run_all_tests.py

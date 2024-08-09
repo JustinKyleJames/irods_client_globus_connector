@@ -1,7 +1,22 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=true
+
+#### install basic packages ####
+RUN apt-get update && apt-get install -y curl \
+    vim \
+    ftp \
+    telnet \
+    libcurl4-openssl-dev \
+    unzip \
+    python3 \
+    python3-distro \
+    python3-psutil \
+    python3-jsonschema \
+    python3-requests \
+    python3-pip \
+    python3-pyodbc
 
 #### Get and install iRODS repo ####
 RUN apt-get update && apt-get install -y wget gnupg2 lsb-release
@@ -19,10 +34,12 @@ RUN apt-get install -y irods-externals-clang*
 
 #### install basic packages ####
 RUN apt-get install -y curl \
+    g++ \
+    gcc \
     vim \
     ftp \
     telnet \
-    libcurl4-openssl-dev \
+    libcurl4-gnutls-dev \
     unzip \
     python3 \
     python3-distro \
@@ -50,15 +67,10 @@ RUN apt-get install -y globus-gridftp-server-progs \
 RUN mkdir /iRODS_DSI
 RUN chmod 777 /iRODS_DSI
 
-#### Get and install iRODS repo ####
-#RUN wget -qO - https://packages.irods.org/irods-signing-key.asc | sudo apt-key add -
-#RUN echo "deb [arch=amd64] https://packages.irods.org/apt/ $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/renci-irods.list
-#RUN apt-get update
-
 ADD start.globus.run.tests.ubuntu.sh /
 RUN chmod u+x /start.globus.run.tests.ubuntu.sh
 
-ADD install_local_irods_client_packages_ubuntu22.sh /install_local_irods_packages.sh
+ADD install_local_irods_client_packages_ubuntu24.sh /install_local_irods_packages.sh
 RUN chmod u+x /install_local_irods_packages.sh
 
 ENTRYPOINT "/start.globus.run.tests.ubuntu.sh"
