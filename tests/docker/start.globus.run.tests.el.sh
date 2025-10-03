@@ -71,7 +71,7 @@ echo '/tempZone/home/rods/dir1;resc1
 ### Build and install the gridftp plugin
 mkdir /bld_irods_client_globus_connector
 cd /bld_irods_client_globus_connector
-/opt/irods-externals/cmake3.21.4-0/bin/cmake /irods_client_globus_connector
+cmake /irods_client_globus_connector
 make -j package
 dnf -y --nogpgcheck install *.rpm
 rm *.rpm

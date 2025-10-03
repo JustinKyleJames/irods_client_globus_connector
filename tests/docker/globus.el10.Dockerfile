@@ -1,6 +1,7 @@
-FROM rockylinux:9
+FROM rockylinux/rockylinux:10
 
-RUN dnf check-update -q >/dev/null || { [ "$?" -eq 100 ] && dnf update -y; }
+RUN dnf update -y || [ "$?" -eq 100 ] && \
+    rm -rf /tmp/*
 
 RUN \
   dnf install -y \
@@ -101,7 +102,7 @@ RUN dnf -y install unixODBC-devel krb5-devel \
 COPY start.globus.run.tests.el.sh /
 RUN chmod u+x /start.globus.run.tests.el.sh
 
-COPY install_local_irods_client_packages_el9.sh /install_local_irods_packages.sh
+COPY install_local_irods_client_packages_el10.sh /install_local_irods_packages.sh
 RUN chmod u+x /install_local_irods_packages.sh
 
 ENTRYPOINT "/start.globus.run.tests.el.sh"
