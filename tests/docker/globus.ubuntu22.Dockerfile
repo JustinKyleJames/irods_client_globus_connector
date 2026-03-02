@@ -34,8 +34,6 @@ RUN wget -qO - https://packages.irods.org/irods-signing-key.asc | apt-key add - 
 # Comment out the irods-icommands and irods-dev if testing against locally
 # built packages.
 RUN apt-get update && apt-get install -y \
-    irods-icommands \
-    irods-dev \
     irods-externals-cmake3.21.4-0 \
     irods-externals-clang13.0.1-0 \
     irods-externals-clang-runtime13.0.1-0 \

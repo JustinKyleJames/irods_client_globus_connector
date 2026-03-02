@@ -85,8 +85,6 @@ RUN mkdir /iRODS_DSI && chmod 777 /iRODS_DSI
 # Comment out the irods-icommands and irods-devel if testing against locally
 # built packages.
 RUN dnf install -y \
-    irods-icommands \
-    irods-devel \
     irods-externals-cmake3.21.4-0 \
     irods-externals-clang13.0.1-0 \
     irods-externals-clang-runtime13.0.1-0 \
